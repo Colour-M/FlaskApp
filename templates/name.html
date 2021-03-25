@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+
+{% block head %}
+<title>Name Search</title>
+    <style>
+      form {
+        margin: 0;
+        max-width: 400px;
+        justify-content: left;
+        align-items: left;
+      }
+      input {
+        font-size: 28px;
+        margin-top: 20px;
+      }
+    </style>
+{% endblock %}
+
+
+{% block body %}
+<h2>Name Search</h2>
+<p>Search the spell by name. Keep in mind that the search is case sensitive however this will be changed later. Spreedsheet of the spells can be accessed using the nav bar above.</p>
+<form action="#" method='POST'>
+  <div class="input-group mb-3" style="width:300px;">
+    <input name="name" id="ex2" type="text" class="form-control" placeholder="Enter id here" aria-label="Recipient's username" aria-describedby="button-addon2">
+    <input class="btn btn-outline-secondary" type="submit" id="button-addon2">
+  </div>
+</form>
+
+<h4>Output:</h4>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Class</th>
+      <th scope="col">Level</th>
+      <th scope="col">Name</th>
+      <th scope="col">School</th>
+      <th scope="col">Casting time</th>
+      <th scope="col">Range</th>
+      <th scope="col">Component</th>
+      <th scope="col">Duration</th>
+      <th scope="col">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      {{info|safe}}
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
