@@ -22,11 +22,13 @@ $(document).ready(function(){
   });
 
   $("#min").change(function() {
-    $("#max").attr('min',$("#min").val());
+    $("#max").attr('min',this.val());
+  });
 
-    if($("#max").val() < $("#min").val()){
-      $("#max").attr('value',$("#min").val());
-  }
+  $("#max").change(function() {
+    if($(this).attr('value') < $("#min").attr('value')){
+      $(this).attr('value',$('#min').attr('value'));
+    }
   });
   
   
@@ -41,7 +43,7 @@ $(document).ready(function(){
   <h2>Multi Search</h2>
   <p>Search the spell by id, clas, etc... a spreedsheet that can be accessed in the nav bar above has information about the spells. Multiple queries can be done at once by seperating the searches with a "|" e.g. Bard|Cleric</p>
   <p>Keep in mind that this is case sensitive. E.g. "bard" will not work but "Bard" will</p>
-  <form method='POST'>
+  <form action="#" method='POST'>
 
     <label>Search type: </label>
     <select name="type" id="seachtype">
@@ -51,7 +53,7 @@ $(document).ready(function(){
         <option value="school">school</option>
         <option value="casting_time">casting time</option>
         <option value="range">range</option>
-        <option value="component">component</option>
+        <option value="components">components</option>
         <option value="duration">duration</option>
       </select>
 
@@ -71,7 +73,10 @@ $(document).ready(function(){
 
 
   <h4>Output:</h4>
-  <button class="checkToggle btn btn-outline-secondary">Columns ▼</button>
+  <form action="/clear">
+    <button class="btn btn-outline-secondary" type="submit">Clear Table</button>
+  </form>
+  <button class="checkToggle btn btn-outline-secondary">Columns</button>
     <div class="form-group" style="display: none;">
       <label>Id</label> <input type="checkbox" class="toggle" data-columnid="id">
       <br>
@@ -93,8 +98,10 @@ $(document).ready(function(){
       <br>
       <label>Description</label> <input type="checkbox" class="toggle" data-columnid="description">
     </div>
+    <br>
+    <a>Results found: {{results_found}} spells</a>
 <br>
-    <table class="table">
+    <table class="table table-striped">
       <thead>
         <tr>
           <th scope="col" class="id">Id</th>

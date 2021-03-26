@@ -36,7 +36,6 @@ def multi_get_ids(search, type_, min, max):
     result = f'"{result}"'
     cur.execute(f'SELECT id FROM spells WHERE {type_} = {result} AND level > {int(min_) - 1} AND level < {int(max_) + 1}')
     ids_ = list(itertools.chain(*cur.fetchall()))
-    print("debug")
     for id_ in ids_:
       final.append(id_)
   
@@ -76,17 +75,13 @@ def multisearch():
     if(request.form['type'] == 'id'): # ------------------ ID SEARCH ---------------------
       try:
         if(multi == False):
-          print(int(search)) # throws error if user inputs any letters so it will break out of try except
+          int(search) # throws error if user inputs any letters so it will break out of try except
         else:
           for id_ in search:
-            print(int(id_))
-
-        cur.execute('DELETE FROM temp') # Resets the temp table so it is ready to have temporary data to be read by the 'GET' method later stored in it
-        con.commit() # commits the removal of the data in temp table
+            int(id_)
 
         if(multi):
           for id_ in search:
-            print(id_)
             cur.execute(f'INSERT INTO temp (spell_id) VALUES ({id_})') # Inserts the id's into temp table
         else:
           cur.execute(f'INSERT INTO temp (spell_id) VALUES ({search})') # Inserts the id's into temp table
@@ -97,10 +92,8 @@ def multisearch():
       except:
         return redirect('/multisearch')
 
-    else: # --------------------- NAME SEARCH ---------------------
+    else: # --------------------- SCHOOL, NAME, ETC... SEARCH ---------------------
       try:
-        cur.execute('DELETE FROM temp') # Resets the temp table
-        con.commit()
 
         if(multi == False):
           ids = get_ids(search, search_type, min_, max_)
@@ -152,13 +145,15 @@ def multisearch():
         final += "</tr>"
 
       # Returns render template with the final as the output
-      return render_template('multi.html', info = final)
+      return render_template('multi.html', info = final, results_found = len(result))
     except:
-      return render_template('multi.html', info = "There may have been an error while searching")
+      return render_template('multi.html', info = "There may have been an error while searching", results_found = 0)
 
-@app.route('/count', methods=['POST', 'GET'])
-def count():
-  return render_template("count.html", info="forntie")
+@app.route('/clear')
+def clear():
+  cur.execute('DELETE FROM temp') # Resets the temp table so it is ready to have temporary data to be read by the 'GET' method later stored in it
+  con.commit() # commits the removal of the data in temp table
+  return redirect('/multisearch')
 
 if __name__ == "__main__":
   app.run(port=25565, debug=True)
