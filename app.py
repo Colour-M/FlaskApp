@@ -24,25 +24,56 @@ classes = {
   9:"description",
 }
 
-def get_ids(search, type_, min_, max_):
-  search = f'"{search}"'
-  cur.execute(f'SELECT id FROM spells WHERE {type_} = {search} AND level > {int(min_) - 1} AND level < {int(max_) + 1}')
-  ids_ = list(itertools.chain(*cur.fetchall()))
-  return ids_
 
-def multi_get_ids(search, type_, min, max):
-  final = []
-  for result in search:
-    result = f'"{result}"'
-    cur.execute(f'SELECT id FROM spells WHERE {type_} = {result} AND level > {int(min_) - 1} AND level < {int(max_) + 1}')
-    ids_ = list(itertools.chain(*cur.fetchall()))
-    for id_ in ids_:
-      final.append(id_)
+class search_obj:
+  def __init__(self, min_, max_, search, type_):
+    self.search = search
+    self.type_ = type_
+    self.min_ = min_
+    self.max_ = max_
   
 
-  return final
+  def get_ids(self):
+    self.search = f'"{self.search}"'
+    cur.execute(f'SELECT id FROM spells WHERE {self.type_} = {self.search} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1}')
+    self.search = list(itertools.chain(*cur.fetchall()))
+    return self.search
 
 
+  def multi_get_ids(self):
+    temp = []
+    for result in self.search:
+      result = f'"{result}"'
+      cur.execute(f'SELECT id FROM spells WHERE {self.type_} = {result} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1}')
+      self.search = list(itertools.chain(*cur.fetchall()))
+      for id_ in self.search:
+        temp.append(id_)
+    self.search = temp
+
+  def insert_id(self):
+    cur.execute(f'SELECT spell_id FROM temp')
+    spell_ids = cur.fetchall()
+    spell_ids = list(itertools.chain(*spell_ids))
+
+    for i in spell_ids:
+        if(i == self.search):
+          break
+    else:
+      cur.execute(f'INSERT INTO temp (spell_id) VALUES ({self.search})')
+    con.commit()
+
+  def insert_multi_ids(self):
+    cur.execute(f'SELECT spell_id FROM temp')
+    spell_ids = cur.fetchall()
+    spell_ids = list(itertools.chain(*spell_ids))
+
+    for id_ in self.search:
+      for i in spell_ids:
+        if(i == id_):
+          break
+      else:
+        cur.execute(f'INSERT INTO temp (spell_id) VALUES ({id_})') # Inserts the id's into temp table
+    con.commit()
 
 @app.route('/')
 def index():
@@ -66,45 +97,38 @@ def multisearch():
     min_ = request.form['min']
     max_ = request.form['max']
 
-    for l in search:
+    for l in search: # Splits search into a list if there are | in it meaning the user wants to do multiple searches at once
       if l == "|":
         search = list(search.split("|"))
         multi = True
         break
+    
+    find = search_obj(min_, max_, search, search_type)
 
     if(request.form['type'] == 'id'): # ------------------ ID SEARCH ---------------------
       try:
-        if(multi == False):
-          int(search) # throws error if user inputs any letters so it will break out of try except
-        else:
-          for id_ in search:
+        if(multi):
+          for id_ in find.search:# Checks if valid id is given (throws error if invalid breaking out of try block)
             int(id_)
 
-        if(multi):
-          for id_ in search:
-            cur.execute(f'INSERT INTO temp (spell_id) VALUES ({id_})') # Inserts the id's into temp table
+          find.insert_multi_ids()
         else:
-          cur.execute(f'INSERT INTO temp (spell_id) VALUES ({search})') # Inserts the id's into temp table
-        
-        con.commit() # Commits data to temp table
-        return redirect('/multisearch') # Redirects back to the same address so 'GET' method will be called and data will be displayed
+          int(find.search) # Checks if valid id is given
 
+          find.insert_id()
+
+        return redirect('/multisearch')
       except:
         return redirect('/multisearch')
 
     else: # --------------------- SCHOOL, NAME, ETC... SEARCH ---------------------
       try:
-
-        if(multi == False):
-          ids = get_ids(search, search_type, min_, max_)
+        if(multi):
+          find.multi_get_ids()
         else:
-          ids = multi_get_ids(search, search_type, min_, max_)
+          find.get_ids()
 
-
-        for id_ in ids:
-          cur.execute(f'INSERT INTO temp (spell_id) VALUES ({id_})') # Inserts the id's into temp table
-
-        con.commit()
+        find.insert_multi_ids()
 
         return redirect('/multisearch')
       except:
