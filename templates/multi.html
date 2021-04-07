@@ -47,8 +47,9 @@ $(document).ready(function(){
   <p>Keep in mind that this is case sensitive. E.g. "bard" will not work but "Bard" will</p>
   <form action="#" method='POST'>
 
-    <label>Search type: </label>
+    <!--<label>Search type: </label>
     <select name="type" id="seachtype">
+        
         <option value="id">id</option>
         <option value="name">name</option>
         <option value="class">class</option>
@@ -57,13 +58,29 @@ $(document).ready(function(){
         <option value="range">range</option>
         <option value="components">components</option>
         <option value="duration">duration</option>
-      </select>
+      </select>-->
+
+      <div class="dropdown">
+        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+          Search types
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+          <li><input type="checkbox" name="id"> <label href="#">id </label></li>
+          <li><input type="checkbox" name="name"> <label href="#">name </label></li>
+          <li><input type="checkbox" name="class"> <label href="#">class </label></li>
+          <li><input type="checkbox" name="school"> <label href="#">school </label></li>
+          <li><input type="checkbox" name="casting_time"> <label href="#">casting time </label></li>
+          <li><input type="checkbox" name="range"> <label href="#">range </label></li>
+          <li><input type="checkbox" name="components"> <label href="#">components </label></li>
+          <li><input type="checkbox" name="duration"> <label href="#">duration </label></li>
+        </ul>
+      </div>
 
     <div>
       <label>Min level:</label>
       <input type="number" id="minLvl" name="min" min="0" value="0"style="width: 50px;">
       <label>Max level:</label>
-      <input type="number" id="maxLvl" name="max" value="10" style="width: 50px;">
+      <input type="number" id="maxLvl" name="max" min="0" value="10" style="width: 50px;">
     </div>
 
     <div class="input-group mb-3" style="min-width: 400px; max-width: 500px; width:40%px;">

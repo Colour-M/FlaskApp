@@ -96,6 +96,7 @@ def multisearch():
     multi = False
     min_ = request.form['min']
     max_ = request.form['max']
+    
 
     for l in search: # Splits search into a list if there are | in it meaning the user wants to do multiple searches at once
       if l == "|":
