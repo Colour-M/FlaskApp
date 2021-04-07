@@ -43,7 +43,7 @@ $(document).ready(function(){
 
 {% block body %}
   <h2>Multi Search</h2>
-  <p>Search the spell by id, clas, etc... a spreedsheet that can be accessed in the nav bar above has information about the spells. Multiple queries can be done at once by seperating the searches with a "|" e.g. Bard|Cleric</p>
+  <p>Search the spell by id, clas, etc... a spreedsheet that can be accessed in the nav bar above contains all the spells. Multiple queries can be done at once by seperating the searches with a "|" e.g. Bard|Cleric</p>
   <p>Keep in mind that this is case sensitive. E.g. "bard" will not work but "Bard" will</p>
   <form action="#" method='POST'>
 
@@ -75,10 +75,13 @@ $(document).ready(function(){
 
 
   <h4>Output:</h4>
-  <form action="/clear">
+  <button class="checkToggle btn btn-outline-secondary" style="display: inline;">Columns</button>
+
+  <form action="/clear" style="display: inline;">
     <button class="btn btn-outline-secondary" type="submit">Clear Table</button>
   </form>
-  <button class="checkToggle btn btn-outline-secondary">Columns</button>
+
+
     <div class="form-group" style="display: none;">
       <label>Id</label> <input type="checkbox" class="toggle" data-columnid="id">
       <br>

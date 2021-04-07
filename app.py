@@ -35,7 +35,7 @@ class search_obj:
 
   def get_ids(self):
     self.search = f'"{self.search}"'
-    cur.execute('SELECT id FROM spells WHERE ? = ? AND level > ? AND level < ?', [self.type_, self.search, int(self.min_) - 1, int(self.max_) + 1])
+    cur.execute(f'SELECT id FROM spells WHERE {self.type_} LIKE {self.search} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1}')
     self.search = list(itertools.chain(*cur.fetchall()))
     return self.search
 
@@ -44,7 +44,7 @@ class search_obj:
     temp = []
     for result in self.search:
       result = f'"{result}"'
-      cur.execute(f'SELECT id FROM spells WHERE {self.type_} = {result} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1}')
+      cur.execute(f'SELECT id FROM spells WHERE {self.type_} LIKE {result} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1} COLLATE NOCASE')
       self.search = list(itertools.chain(*cur.fetchall()))
       for id_ in self.search:
         temp.append(id_)
