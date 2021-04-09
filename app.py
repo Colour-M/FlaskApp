@@ -24,30 +24,43 @@ classes = {
   9:"description",
 }
 
-
 class search_obj:
-  def __init__(self, min_, max_, search, type_):
+  def __init__(self, min_, max_, search, types_):
     self.search = search
-    self.type_ = type_
-    self.min_ = min_
-    self.max_ = max_
+    self.types_ = types_
+    self.min_ = int(min_)
+    self.max_ = int(max_)
+    # for i in self.types_:
+    #   print(i)
   
 
   def get_ids(self):
     self.search = f'"{self.search}"'
-    cur.execute(f'SELECT id FROM spells WHERE {self.type_} LIKE {self.search} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1}')
-    self.search = list(itertools.chain(*cur.fetchall()))
+    temp = []
+    for type_ in self.types_:
+      if(type_ != "id" and self.types_[type_] == "on"):
+        cur.execute(f'SELECT id FROM spells WHERE {type_} LIKE {self.search} AND level > {self.min_ - 1} AND level < {self.max_ + 1}')
+        results = list(itertools.chain(*cur.fetchall()))
+        
+        for i in results:
+          temp.append(i)
+        
+
+    self.search = temp
     return self.search
 
 
   def multi_get_ids(self):
     temp = []
-    for result in self.search:
-      result = f'"{result}"'
-      cur.execute(f'SELECT id FROM spells WHERE {self.type_} LIKE {result} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1} COLLATE NOCASE')
-      self.search = list(itertools.chain(*cur.fetchall()))
-      for id_ in self.search:
-        temp.append(id_)
+
+    for type_ in self.types_:
+      for result in self.search:
+        result = f'"{result}"'
+        cur.execute(f'SELECT id FROM spells WHERE {type_} LIKE {result} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1} COLLATE NOCASE')
+        self.search = list(itertools.chain(*cur.fetchall()))
+        for id_ in self.search:
+          temp.append(id_)
+
     self.search = temp
 
   def insert_id(self):
@@ -75,6 +88,8 @@ class search_obj:
         cur.execute(f'INSERT INTO temp (spell_id) VALUES ({id_})') # Inserts the id's into temp table
     con.commit()
 
+
+
 @app.route('/')
 def index():
   return redirect('/home')
@@ -92,11 +107,25 @@ def home():
 def multisearch():
   if(request.method == 'POST'):
     search = request.form['search']
-    search_type = request.form['type']
     multi = False
     min_ = request.form['min']
     max_ = request.form['max']
-    
+    types = {
+      "id":"",
+      "name":"",
+      "class":"",
+      "school":"",
+      "casting_time":"",
+      "range":"",
+      "components":"",
+      "duration":"",
+    }
+
+    # Handle search types
+    for i in types:
+      item = request.form.get(i)
+      types[i] = str(item)
+
 
     for l in search: # Splits search into a list if there are | in it meaning the user wants to do multiple searches at once
       if l == "|":
@@ -104,9 +133,9 @@ def multisearch():
         multi = True
         break
     
-    find = search_obj(min_, max_, search, search_type)
+    find = search_obj(min_, max_, search, types)
 
-    if(request.form['type'] == 'id'): # ------------------ ID SEARCH ---------------------
+    if(types["id"] == 'on'): # ------------------ ID SEARCH ---------------------
       try:
         if(multi):
           for id_ in find.search:# Checks if valid id is given (throws error if invalid breaking out of try block)
