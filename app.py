@@ -52,14 +52,14 @@ class search_obj:
 
   def multi_get_ids(self):
     temp = []
-
     for type_ in self.types_:
-      for result in self.search:
-        result = f'"{result}"'
-        cur.execute(f'SELECT id FROM spells WHERE {type_} LIKE {result} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1} COLLATE NOCASE')
-        self.search = list(itertools.chain(*cur.fetchall()))
-        for id_ in self.search:
-          temp.append(id_)
+      if(type_ != "id" and self.types_[type_] == "on"):
+        for result in self.search:
+          result = f'"{result}"'
+          cur.execute(f'SELECT id FROM spells WHERE {type_} LIKE {result} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1} COLLATE NOCASE')
+          result = list(itertools.chain(*cur.fetchall()))
+          for id_ in result:
+            temp.append(id_)
 
     self.search = temp
 
@@ -137,15 +137,15 @@ def multisearch():
 
     if(types["id"] == 'on'): # ------------------ ID SEARCH ---------------------
       try:
-        if(multi):
-          for id_ in find.search:# Checks if valid id is given (throws error if invalid breaking out of try block)
+        if(multi): # Is multi search is being used e.g. "bard|cleric"?
+          for id_ in find.search:# Checks if valid id is given (Throws error if id given is not a number and will break out of the try block)
             int(id_)
 
-          find.insert_multi_ids()
+          find.insert_multi_ids() # Inserts all the ids given by the user
         else:
-          int(find.search) # Checks if valid id is given
+          int(find.search) # Checks if valid id is given (Checks if it is a number)
 
-          find.insert_id()
+          find.insert_id() # Inserts id given by the user
 
         return redirect('/multisearch')
       except:
@@ -154,27 +154,27 @@ def multisearch():
     else: # --------------------- SCHOOL, NAME, ETC... SEARCH ---------------------
       try:
         if(multi):
-          find.multi_get_ids()
+          find.multi_get_ids() # Gets the ids from spells table
         else:
-          find.get_ids()
+          find.get_ids() # Gets ids from spells table
 
-        find.insert_multi_ids()
+        find.insert_multi_ids() # Inserts ids into the temp table for it to be displayed in the method='GET'
 
         return redirect('/multisearch')
       except:
         return redirect('/multisearch')
-  else:
+  else: # ------------------------------------------- Displaying Info --------------------------------------------
     try:
       cur.execute(f'SELECT spell_id FROM temp') # Gets spell id's from temp table so the if statement below can check the length of it
 
-      if(len(cur.fetchall()) == 1): # If there is only one id found
+      if(len(cur.fetchall()) == 1): # If there is only one spell found
 
         cur.execute(f'SELECT spell_id FROM temp') # Gets spell id from temp table
         spell_id = cur.fetchone()[0] # Fetches the id from query above
 
         cur.execute(f"SELECT * FROM spells WHERE id = {spell_id}") # Gathers information on any spells that are stored in temp table
         result = cur.fetchall()
-      else:
+      else: # If multiple results are found in the temp table
 
         cur.execute(f'SELECT spell_id FROM temp') # Gets spells id's from temp table
 
@@ -184,26 +184,24 @@ def multisearch():
         result = [] # Initializing results list
 
         for num in spell_id: # Loops through the list that contains each spell id that needs to be queried
-          cur.execute(f"SELECT * FROM spells WHERE id = {num}") # Gathers information on any spells that are stored in temp table
+          cur.execute(f"SELECT * FROM spells WHERE id = {num}") # Gathers information on any spells thats ids were stored in temp table
           result.append(cur.fetchone()) # Appends the result from the query as a list to the results list
 
-      # Converts list to table rows
+      # Converts list to html than can be inserted in the table on the webpage
       final = "" 
       i = 0
-      for row in result:
-        final += "<tr>"
-        for column in row:
-          final = final + f" <td class='{classes[i]}'>{column}</td>"
-          i += 1
-        i = 0
-        final += "</tr>"
+      for row in result: # Loops through all the spells found in the temp table
+        final += "<tr>" # Adds a <tr> to mark the start of a row
+        for column in row: # Loops through each aspect of the spell
+          final = final + f" <td class='{classes[i]}'>{column}</td>" # Adds <td> tag to mark it as a column and adds a class, using i, so it can be collapsed with jquery
+          i += 1 
+        i = 0 # resets i
+        final += "</tr>" # Closes the row with a </tr> tag
 
       # Returns render template with the final as the output
-      return render_template('multi.html', info = final, results_found = len(result))
+      return render_template('multi.html', info = final, results_found = len(result)) # returns render template with the html created above and amount of results taken as variables
     except:
       return render_template('multi.html', info = "There may have been an error while searching", results_found = 0)
-
-
 
 @app.route('/clear')
 def clear():
