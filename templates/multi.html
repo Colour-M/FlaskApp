@@ -43,11 +43,14 @@ $(document).ready(function(){
 
 {% block body %}
   <h2>Multi Search</h2>
-  <p>Search the spell by id, clas, etc... a spreedsheet that can be accessed in the nav bar above contains all the spells. Multiple queries can be done at once by seperating the searches with a "|" e.g. Bard|Cleric</p>
-  <p>Keep in mind that this is case sensitive. E.g. "bard" will not work but "Bard" will</p>
+  <div style="width: 50%;">
+    <p>Search the spell by id, clas, etc... a spreedsheet that can be accessed in the nav bar above that contains all the spells. Multiple queries can be done at once by seperating the searches with a "|" e.g. Bard|Cleric. 
+      The search type dropdown can be used to do search for multiple types at once such as searching for a spell with the class Bard and duration of 1 minute using "Bard|1 minute" with class and duration selected in the search type dropdown.</p>
+  </div>
+  
   <form action="#" method='POST'>
 
-    <!--<label>Search type: </label>
+    <!--<label>Search type: </label> ----------------- this is the previous version of the programs type choices ------------
     <select name="type" id="seachtype">
         
         <option value="id">id</option>
@@ -65,17 +68,18 @@ $(document).ready(function(){
           Search types
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          <li><input type="checkbox" name="id"> <label>id </label></li>
-          <li><input type="checkbox" name="name"> <label>name </label></li>
-          <li><input type="checkbox" name="class"> <label>class </label></li>
-          <li><input type="checkbox" name="school"> <label>school </label></li>
-          <li><input type="checkbox" name="casting_time"> <label>casting time </label></li>
-          <li><input type="checkbox" name="range"> <label>range </label></li>
-          <li><input type="checkbox" name="components"> <label>components </label></li>
-          <li><input type="checkbox" name="duration"> <label>duration </label></li>
+          <li><input type="checkbox" name="id" checked="on"> <label>id </label></li>
+          <li><input type="checkbox" name="name" checked="on"> <label>name </label></li>
+          <li><input type="checkbox" name="class" checked="on"> <label>class </label></li>
+          <li><input type="checkbox" name="school" checked="on"> <label>school </label></li>
+          <li><input type="checkbox" name="casting_time" checked="on"> <label>casting time </label></li>
+          <li><input type="checkbox" name="range" checked="on"> <label>range </label></li>
+          <li><input type="checkbox" name="components" checked="on"> <label>components </label></li>
+          <li><input type="checkbox" name="duration" checked="on"> <label>duration </label></li>
         </ul>
       </div>
 
+      
     <div>
       <label>Min level:</label>
       <input type="number" id="minLvl" name="min" min="0" value="0"style="width: 50px;">
@@ -100,25 +104,25 @@ $(document).ready(function(){
 
 
     <div class="form-group" style="display: none;">
-      <label>Id</label> <input type="checkbox" class="toggle" data-columnid="id">
+      <input type="checkbox" class="toggle" data-columnid="id"> <label>Id</label> 
       <br>
-      <label>Class</label> <input type="checkbox" class="toggle" data-columnid="class" checked="True">
+      <input type="checkbox" class="toggle" data-columnid="class" checked="True"> <label>Class</label> 
       <br>
-      <label>Level</label> <input type="checkbox" class="toggle" data-columnid="level" checked="True">
+      <input type="checkbox" class="toggle" data-columnid="level" checked="True"> <label>Level</label> 
       <br>
-      <label>Name</label> <input type="checkbox" class="toggle" data-columnid="name" checked="True">
+      <input type="checkbox" class="toggle" data-columnid="name" checked="True"> <label>Name</label> 
       <br>
-      <label>School</label> <input type="checkbox" class="toggle" data-columnid="school" checked="True">
+      <input type="checkbox" class="toggle" data-columnid="school" checked="True"> <label>School</label> 
       <br>
-      <label>Casting time</label> <input type="checkbox" class="toggle" data-columnid="casting_time" checked="True">
+      <input type="checkbox" class="toggle" data-columnid="casting_time" checked="True"> <label>Casting time</label> 
       <br>
-      <label>Range</label> <input type="checkbox" class="toggle" data-columnid="range" checked="True">
+      <input type="checkbox" class="toggle" data-columnid="range" checked="True"> <label>Range</label> 
       <br>
-      <label>Component</label> <input type="checkbox" class="toggle" data-columnid="component" checked="True">
+      <input type="checkbox" class="toggle" data-columnid="component" checked="True"> <label>Component</label> 
       <br>
-      <label>Duration</label> <input type="checkbox" class="toggle" data-columnid="duration" checked="True">
+      <input type="checkbox" class="toggle" data-columnid="duration" checked="True"> <label>Duration</label> 
       <br>
-      <label>Description</label> <input type="checkbox" class="toggle" data-columnid="description">
+      <input type="checkbox" class="toggle" data-columnid="description"> <label>Description</label> 
     </div>
     <br>
     <a>Results found: {{results_found}} spells</a>

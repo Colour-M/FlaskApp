@@ -30,8 +30,6 @@ class search_obj:
     self.types_ = types_
     self.min_ = int(min_)
     self.max_ = int(max_)
-    # for i in self.types_:
-    #   print(i)
   
 
   def get_ids(self):
