@@ -78,8 +78,8 @@ class search_obj:
     spell_ids = cur.fetchall()
     spell_ids = list(itertools.chain(*spell_ids))
 
-    for id_ in self.search:
-      for i in spell_ids:
+    for id_ in self.search: 
+      for i in spell_ids:# Checks if the current id is alreading the temp table and if it is it will break out of loop not allowing cur.execute to be called
         if(i == id_):
           break
       else:
@@ -130,10 +130,47 @@ def multisearch():
         search = list(search.split("|"))
         multi = True
         break
-    
+
+    temp_search = search
+
     find = search_obj(min_, max_, search, types) # creates the find object that stores all the variables above and contains methods to handle the data
 
+    if(types["id"] == 'on'): # ------------------ ID SEARCH ---------------------
+      try:
+        if(multi): # Is multi search is being used e.g. "bard|cleric"?
+          for id_ in find.search:# Checks if valid id is given (Throws error if id given is not a number and will break out of the try block)
+            try:
+              int(id_)
+              
+            except:
+              find.search.remove(id_)
+
+          find.insert_multi_ids() # Inserts all the ids given by the user
+        else:
+          try:
+            int(find.search) # Checks if valid id is given (Checks if it is a number)
+            find.insert_id() # Inserts id given by the user
+          except:
+            print("Invalid id")
+
+        #return redirect('/multisearch')
+      except:
+        print("FAILED")
+        return redirect('/multisearch')
+
     # --------------------- SCHOOL, NAME, ETC... SEARCH ---------------------
+    
+
+    temp_search = request.form['search']
+
+    for l in temp_search: # Splits search into a list if there are "|" in it which means the user wants to do multiple searches at once
+      if l == "|":
+        temp_search = list(temp_search.split("|"))
+        multi = True
+        break
+
+    find.search = temp_search
+
     try:
       if(multi):
         find.multi_get_ids() # Gets the ids from spells table
@@ -142,29 +179,10 @@ def multisearch():
 
       find.insert_multi_ids() # Inserts ids into the temp table for it to be displayed in the method='GET'
 
-      #return redirect('/multisearch')
+      return redirect('/multisearch')
     except:
       print("DEBUG")
       return redirect('/multisearch')
-
-    if(types["id"] == 'on'): # ------------------ ID SEARCH ---------------------
-      try:
-        if(multi): # Is multi search is being used e.g. "bard|cleric"?
-          for id_ in find.search:# Checks if valid id is given (Throws error if id given is not a number and will break out of the try block)
-            try:
-              int(id_)
-            except:
-              find.search.remove(id_)
-
-          find.insert_multi_ids() # Inserts all the ids given by the user
-        else:
-          int(find.search) # Checks if valid id is given (Checks if it is a number)
-
-          find.insert_id() # Inserts id given by the user
-
-        return redirect('/multisearch')
-      except:
-        return redirect('/multisearch')
 
   else: # ------------------------------------------- Displaying Info (GET) --------------------------------------------
     try:
@@ -195,13 +213,13 @@ def multisearch():
       i = 0
       for row in result: # Loops through all the spells found in the temp table
         final += "<tr>" # Adds a <tr> to mark the start of a row
-        for column in row: # Loops through each aspect of the spell
+        for column in row: # Loops through each aspect of the spell e.g. name, class, level
           final = final + f" <td class='{classes[i]}'>{column}</td>" # Adds <td> tag to mark it as a column and adds a class, using i, so it can be collapsed with jquery
           i += 1 
         i = 0 # resets i
         final += "</tr>" # Closes the row with a </tr> tag
 
-      # Returns render template with the final as the output
+      # Returns render template with the final as the data to be put into the table len(result) as the amount of results and status as nothing
       return render_template('multi.html', info = final, status = "", results_found = len(result)) # returns render template with the html created above and amount of results taken as variables
     except:
       return render_template('multi.html', info = "", status = "There may have been an error while searching", results_found = 0)
@@ -209,8 +227,8 @@ def multisearch():
 @app.route('/clear')
 def clear():
   cur.execute('DELETE FROM temp') # Resets the temp table so it is ready to have temporary data to be read by the 'GET' method later stored in it
-  con.commit() # commits the removal of the data in temp table
-  return redirect('/multisearch')
+  con.commit() # Commits the removal of the data in temp table
+  return redirect('/multisearch') # Redirects back to "/multisearch"
 
 if __name__ == "__main__":
   app.run(port=25565, debug=True)
