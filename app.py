@@ -103,12 +103,12 @@ def home():
 
 @app.route('/multisearch', methods=['POST', 'GET'])
 def multisearch():
-  if(request.method == 'POST'):
-    search = request.form['search']
-    multi = False
-    min_ = request.form['min']
-    max_ = request.form['max']
-    types = {
+  if(request.method == 'POST'): #--------------------- RECEIVING INPUT (POST) --------------------
+    search = request.form['search'] # Gets the input form the user
+    multi = False # creates multi variable that will detirmine if someone has used "|" in their search
+    min_ = request.form['min'] # Gets min level
+    max_ = request.form['max'] # Gets max level
+    types = { # A dictionary is created that will store what search types are to be used
       "id":"",
       "name":"",
       "class":"",
@@ -119,25 +119,42 @@ def multisearch():
       "duration":"",
     }
 
-    # Handle search types
+    # Handles search types (The value of a key in the dictionary will be set to off or on)
     for i in types:
       item = request.form.get(i)
       types[i] = str(item)
 
 
-    for l in search: # Splits search into a list if there are | in it meaning the user wants to do multiple searches at once
+    for l in search: # Splits search into a list if there are "|" in it which means the user wants to do multiple searches at once
       if l == "|":
         search = list(search.split("|"))
         multi = True
         break
     
-    find = search_obj(min_, max_, search, types)
+    find = search_obj(min_, max_, search, types) # creates the find object that stores all the variables above and contains methods to handle the data
+
+    # --------------------- SCHOOL, NAME, ETC... SEARCH ---------------------
+    try:
+      if(multi):
+        find.multi_get_ids() # Gets the ids from spells table
+      else:
+        find.get_ids() # Gets ids from spells table
+
+      find.insert_multi_ids() # Inserts ids into the temp table for it to be displayed in the method='GET'
+
+      #return redirect('/multisearch')
+    except:
+      print("DEBUG")
+      return redirect('/multisearch')
 
     if(types["id"] == 'on'): # ------------------ ID SEARCH ---------------------
       try:
         if(multi): # Is multi search is being used e.g. "bard|cleric"?
           for id_ in find.search:# Checks if valid id is given (Throws error if id given is not a number and will break out of the try block)
-            int(id_)
+            try:
+              int(id_)
+            except:
+              find.search.remove(id_)
 
           find.insert_multi_ids() # Inserts all the ids given by the user
         else:
@@ -149,19 +166,7 @@ def multisearch():
       except:
         return redirect('/multisearch')
 
-    else: # --------------------- SCHOOL, NAME, ETC... SEARCH ---------------------
-      try:
-        if(multi):
-          find.multi_get_ids() # Gets the ids from spells table
-        else:
-          find.get_ids() # Gets ids from spells table
-
-        find.insert_multi_ids() # Inserts ids into the temp table for it to be displayed in the method='GET'
-
-        return redirect('/multisearch')
-      except:
-        return redirect('/multisearch')
-  else: # ------------------------------------------- Displaying Info --------------------------------------------
+  else: # ------------------------------------------- Displaying Info (GET) --------------------------------------------
     try:
       cur.execute(f'SELECT spell_id FROM temp') # Gets spell id's from temp table so the if statement below can check the length of it
 
@@ -197,9 +202,9 @@ def multisearch():
         final += "</tr>" # Closes the row with a </tr> tag
 
       # Returns render template with the final as the output
-      return render_template('multi.html', info = final, results_found = len(result)) # returns render template with the html created above and amount of results taken as variables
+      return render_template('multi.html', info = final, status = "", results_found = len(result)) # returns render template with the html created above and amount of results taken as variables
     except:
-      return render_template('multi.html', info = "There may have been an error while searching", results_found = 0)
+      return render_template('multi.html', info = "", status = "There may have been an error while searching", results_found = 0)
 
 @app.route('/clear')
 def clear():
