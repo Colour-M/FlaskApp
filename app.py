@@ -1,17 +1,17 @@
-from flask import Flask, render_template, request, redirect, url_for
-import sqlite3
-import itertools
+from flask import Flask, render_template, request, redirect, url_for # Importing flask and methods from the module that are used
+import sqlite3 # Importing sqlite3
+import itertools # Importing itertools for flattening lists
 
 app = Flask(__name__)
 
-con = sqlite3.connect('spells.db', check_same_thread=False)
+con = sqlite3.connect('spells.db', check_same_thread=False) # Connecting to the .db file that contains all the database
 cur = con.cursor()
 con.row_factory = sqlite3.Row
 
 cur.execute('DELETE FROM temp') # Resets the temp table
 con.commit()
 
-classes = {
+classes = { # Dictionary create to allow the correct class to be given to html elements when they are inserted into the table shown
   0:"id",
   1:"class",
   2:"level",
@@ -25,65 +25,64 @@ classes = {
 }
 
 class search_obj:
-  def __init__(self, min_, max_, search, types_):
+  def __init__(self, min_, max_, search, types_): # Sets variables search, types, min and max
     self.search = search
     self.types_ = types_
     self.min_ = int(min_)
     self.max_ = int(max_)
   
 
-  def get_ids(self):
-    self.search = f'"{self.search}"'
+  def get_ids(self): # This method is used for getting specific ids from the spells table
+    self.search = f'"{self.search}"' # --------------- Carries one iteration of the method below ----------
     temp = []
     for type_ in self.types_:
       if(type_ != "id" and self.types_[type_] == "on"):
         cur.execute(f'SELECT id FROM spells WHERE {type_} LIKE {self.search} AND level > {self.min_ - 1} AND level < {self.max_ + 1}')
         results = list(itertools.chain(*cur.fetchall()))
-        
         for i in results:
           temp.append(i)
-        
 
     self.search = temp
     return self.search
 
 
-  def multi_get_ids(self):
+  def multi_get_ids(self): # Gets ids based on multiple searches
     temp = []
-    for type_ in self.types_:
-      if(type_ != "id" and self.types_[type_] == "on"):
-        for result in self.search:
-          result = f'"{result}"'
-          cur.execute(f'SELECT id FROM spells WHERE {type_} LIKE {result} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1} COLLATE NOCASE')
-          result = list(itertools.chain(*cur.fetchall()))
-          for id_ in result:
+    for type_ in self.types_: # Loops through all the types that are used in the search and carries out a search using that type
+      if(type_ != "id" and self.types_[type_] == "on"): # Makes sure it is not an id search
+        for result in self.search: # Loops through each item in the current search and checks if it is in the spells table
+          result = f'"{result}"' # Adds quotes to the search so the sql will be (SELECT * FROM table WHERE type LIKE "search") with the quote otherwise it will not work
+          cur.execute(f'SELECT id FROM spells WHERE {type_} LIKE {result} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1}')
+          result = list(itertools.chain(*cur.fetchall())) # Gets the results and then flattens the list
+          for id_ in result: # Loops through all the current ids and appends them to the temp table
             temp.append(id_)
+    self.search = temp # Sets the self.search to the results in the temp table so it is ready to be inserted into the temp table.
 
-    self.search = temp
 
-  def insert_id(self):
-    cur.execute(f'SELECT spell_id FROM temp')
+  def insert_id(self): # Inserts 1 id to the temp table
+    cur.execute(f'SELECT spell_id FROM temp') #---- Gets current ids ----
     spell_ids = cur.fetchall()
     spell_ids = list(itertools.chain(*spell_ids))
 
-    for i in spell_ids:
-        if(i == self.search):
+    for i in spell_ids: # Loops through current ids
+        if(i == self.search): # Checks if current id is already been searched for.
           break
     else:
-      cur.execute(f'INSERT INTO temp (spell_id) VALUES ({self.search})')
+      cur.execute(f'INSERT INTO temp (spell_id) VALUES ({self.search})') # Inserts id into temp table
     con.commit()
 
-  def insert_multi_ids(self):
+
+  def insert_multi_ids(self): # Inserts multiple ids
     cur.execute(f'SELECT spell_id FROM temp')
     spell_ids = cur.fetchall()
     spell_ids = list(itertools.chain(*spell_ids))
 
-    for id_ in self.search: 
-      for i in spell_ids:# Checks if the current id is alreading the temp table and if it is it will break out of loop not allowing cur.execute to be called
+    for id_ in self.search: # Loops through all the ids in the search
+      for i in spell_ids:# Checks if the current id is already the temp table and if it is it will break out of loop not allowing cur.execute to be called
         if(i == id_):
           break
       else:
-        cur.execute(f'INSERT INTO temp (spell_id) VALUES ({id_})') # Inserts the id's into temp table
+        cur.execute(f'INSERT INTO temp (spell_id) VALUES ({id_})') # Inserts the id into temp table
     con.commit()
 
 
@@ -127,11 +126,9 @@ def multisearch():
 
     for l in search: # Splits search into a list if there are "|" in it which means the user wants to do multiple searches at once
       if l == "|":
-        search = list(search.split("|"))
+        search = list(search.split("|")) # Splits the search into a list using "|" to seperate items
         multi = True
         break
-
-    temp_search = search
 
     find = search_obj(min_, max_, search, types) # creates the find object that stores all the variables above and contains methods to handle the data
 
@@ -143,7 +140,7 @@ def multisearch():
               int(id_)
               
             except:
-              find.search.remove(id_)
+              find.search.remove(id_) # removes id from the search so it can be the list can be used in the find.insert_multi_ids()
 
           find.insert_multi_ids() # Inserts all the ids given by the user
         else:
@@ -155,21 +152,19 @@ def multisearch():
 
         #return redirect('/multisearch')
       except:
-        print("FAILED")
+        print("Id Search failed")
         return redirect('/multisearch')
 
     # --------------------- SCHOOL, NAME, ETC... SEARCH ---------------------
     
 
-    temp_search = request.form['search']
+    find.search = request.form['search']
 
-    for l in temp_search: # Splits search into a list if there are "|" in it which means the user wants to do multiple searches at once
+    for l in find.search: # Resets the search back to include searches that are not just id's
       if l == "|":
-        temp_search = list(temp_search.split("|"))
+        find.search = list(find.search.split("|"))
         multi = True
         break
-
-    find.search = temp_search
 
     try:
       if(multi):

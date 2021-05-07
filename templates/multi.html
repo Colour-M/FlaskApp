@@ -43,25 +43,9 @@ $(document).ready(function(){
 
 {% block body %}
   <h2>Multi Search</h2>
-  <div style="width: 50%;">
-    <p>Search the spell by id, clas, etc... a spreedsheet that can be accessed in the nav bar above that contains all the spells. Multiple queries can be done at once by seperating the searches with a "|" e.g. Bard|Cleric. 
-      The search type dropdown can be used to do search for multiple types at once such as searching for a spell with the class Bard and duration of 1 minute using "Bard|1 minute" with class and duration selected in the search type dropdown.</p>
-  </div>
-  
-  <form action="#" method='POST'>
+  <br>
 
-    <!--<label>Search type: </label> ----------------- this is the previous version of the programs type choices ------------
-    <select name="type" id="seachtype">
-        
-        <option value="id">id</option>
-        <option value="name">name</option>
-        <option value="class">class</option>
-        <option value="school">school</option>
-        <option value="casting_time">casting time</option>
-        <option value="range">range</option>
-        <option value="components">components</option>
-        <option value="duration">duration</option>
-      </select>-->
+  <form action="#" method='POST'>
 
       <div class="dropdown">
         <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -86,14 +70,14 @@ $(document).ready(function(){
       <label>Max level:</label>
       <input type="number" id="maxLvl" name="max" min="0" value="10" style="width: 50px;">
     </div>
-
+    
     <div class="input-group mb-3" style="min-width: 400px; max-width: 500px; width:40%px;">
       <input name="search" id="ex2" type="text" class="form-control" placeholder="Enter search here" aria-label="Recipient's username" aria-describedby="button-addon2">
       <input class="btn btn-outline-secondary" type="submit" id="button-addon2">
     </div>
   </form>
 
-
+  <br>
 
   <h4>Output:</h4>
   <button class="checkToggle btn btn-outline-secondary" style="display: inline;">Columns</button>
