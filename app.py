@@ -5,6 +5,7 @@ import itertools # Importing itertools for flattening lists
 app = Flask(__name__)
 
 con = sqlite3.connect('spells.db', check_same_thread=False) # Connecting to the .db file that contains all the database
+con.execute("PRAGMA foreign_keys = 1")
 cur = con.cursor()
 con.row_factory = sqlite3.Row
 
@@ -209,6 +210,8 @@ def multisearch():
       for row in result: # Loops through all the spells found in the temp table
         final += "<tr>" # Adds a <tr> to mark the start of a row
         for column in row: # Loops through each aspect of the spell e.g. name, class, level
+          if(classes[i] == "class"):
+            # Get class of current spell
           final = final + f" <td class='{classes[i]}'>{column}</td>" # Adds <td> tag to mark it as a column and adds a class, using i, so it can be collapsed with jquery
           i += 1 
         i = 0 # resets i
@@ -222,6 +225,7 @@ def multisearch():
 @app.route('/clear')
 def clear():
   cur.execute('DELETE FROM temp') # Resets the temp table so it is ready to have temporary data to be read by the 'GET' method later stored in it
+  cur.execute('DELETE FROM sqlite_sequence WHERE name = "temp"')
   con.commit() # Commits the removal of the data in temp table
   return redirect('/multisearch') # Redirects back to "/multisearch"
 
