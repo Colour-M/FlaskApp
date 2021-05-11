@@ -212,6 +212,8 @@ def multisearch():
         for column in row: # Loops through each aspect of the spell e.g. name, class, level
           if(classes[i] == "class"):
             # Get class of current spell
+            pass
+            
           final = final + f" <td class='{classes[i]}'>{column}</td>" # Adds <td> tag to mark it as a column and adds a class, using i, so it can be collapsed with jquery
           i += 1 
         i = 0 # resets i
