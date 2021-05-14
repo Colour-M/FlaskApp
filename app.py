@@ -4,7 +4,7 @@ import itertools # Importing itertools for flattening lists
 
 app = Flask(__name__)
 
-con = sqlite3.connect('spells.db', check_same_thread=False) # Connecting to the .db file that contains all the database
+con = sqlite3.connect('spellsWithClasses.db', check_same_thread=False) # Connecting to the .db file that contains all the database
 con.execute("PRAGMA foreign_keys = 1")
 cur = con.cursor()
 con.row_factory = sqlite3.Row
@@ -33,11 +33,11 @@ class search_obj:
     self.max_ = int(max_)
   
 
-  def get_ids(self): # This method is used for getting specific ids from the spells table
-    self.search = f'"{self.search}"' # --------------- Carries one iteration of the method below ----------
+  def get_ids(self): # This method is used for getting specific ids from the spells table --------------- Carries out one iteration of the method below ----------
+    self.search = f'"{self.search}"' 
     temp = []
     for type_ in self.types_:
-      if(type_ != "id" and self.types_[type_] == "on"):
+      if(type_ != "id" and type_ != "class" and self.types_[type_] == "on"):
         cur.execute(f'SELECT id FROM spells WHERE {type_} LIKE {self.search} AND level > {self.min_ - 1} AND level < {self.max_ + 1}')
         results = list(itertools.chain(*cur.fetchall()))
         for i in results:
@@ -50,7 +50,7 @@ class search_obj:
   def multi_get_ids(self): # Gets ids based on multiple searches
     temp = []
     for type_ in self.types_: # Loops through all the types that are used in the search and carries out a search using that type
-      if(type_ != "id" and self.types_[type_] == "on"): # Makes sure it is not an id search
+      if(type_ != "id" and type_ != "class" and self.types_[type_] == "on"): # Makes sure it is not an id search
         for result in self.search: # Loops through each item in the current search and checks if it is in the spells table
           result = f'"{result}"' # Adds quotes to the search so the sql will be (SELECT * FROM table WHERE type LIKE "search") with the quote otherwise it will not work
           cur.execute(f'SELECT id FROM spells WHERE {type_} LIKE {result} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1}')
@@ -86,8 +86,19 @@ class search_obj:
         cur.execute(f'INSERT INTO temp (spell_id) VALUES ({id_})') # Inserts the id into temp table
     con.commit()
 
-
-
+  def get_ids_from_class(self):
+    
+    temp = []
+    self.search = f'"{self.search}"' 
+    cur.execute(f'SELECT id FROM classes WHERE class LIKE {self.search}')
+    
+    id___ = cur.fetchone()[0]
+    print("debug2")
+    cur.execute(f'SELECT spell_id FROM class_spell_link WHERE class_id = {id___}')
+    print("debug1")
+    results = list(itertools.chain(*cur.fetchall()))
+    self.search = results
+      
 @app.route('/')
 def index():
   return redirect('/home')
@@ -156,6 +167,30 @@ def multisearch():
         print("Id Search failed")
         return redirect('/multisearch')
 
+    find.search = request.form['search']
+
+    for l in find.search: # Resets the search back to include searches that are not just id's
+      if l == "|":
+        find.search = list(find.search.split("|"))
+        multi = True
+        break
+
+    if(types["class"] == "on"):
+      try:
+        
+        if(multi):
+          for id_ in find.search:
+            find.search = id_
+            find.get_ids_from_class()
+            find.insert_multi_ids()
+        else:
+          
+          find.get_ids_from_class()
+          print("hellO?")
+          find.insert_multi_ids()
+      except:
+        print("FAILED CLASS SEARCH")
+          
     # --------------------- SCHOOL, NAME, ETC... SEARCH ---------------------
     
 
@@ -212,8 +247,15 @@ def multisearch():
         for column in row: # Loops through each aspect of the spell e.g. name, class, level
           if(classes[i] == "class"):
             # Get class of current spell
-            pass
+            column = ""
+            cur.execute(f'SELECT class_id FROM class_spell_link WHERE spell_id = {row[0]}')
+            ids___ = list(itertools.chain(*cur.fetchall()))
             
+            for id___ in ids___:
+              cur.execute(f'SELECT class FROM classes WHERE id = {id___}')
+
+              column += f"{cur.fetchone()[0]} "
+
           final = final + f" <td class='{classes[i]}'>{column}</td>" # Adds <td> tag to mark it as a column and adds a class, using i, so it can be collapsed with jquery
           i += 1 
         i = 0 # resets i
