@@ -4,7 +4,7 @@ import itertools # Importing itertools for flattening lists
 
 app = Flask(__name__)
 
-con = sqlite3.connect('spellsWithClasses.db', check_same_thread=False) # Connecting to the .db file that contains all the database
+con = sqlite3.connect('spells.db', check_same_thread=False) # Connecting to the .db file that contains all the database
 con.execute("PRAGMA foreign_keys = 1")
 cur = con.cursor()
 con.row_factory = sqlite3.Row
@@ -165,7 +165,7 @@ def multisearch():
         #return redirect('/multisearch')
       except:
         print("Id Search failed")
-        return redirect('/multisearch')
+        #return redirect('/multisearch')
 
     find.search = request.form['search']
 
@@ -186,7 +186,6 @@ def multisearch():
         else:
           
           find.get_ids_from_class()
-          print("hellO?")
           find.insert_multi_ids()
       except:
         print("FAILED CLASS SEARCH")
@@ -216,6 +215,7 @@ def multisearch():
       return redirect('/multisearch')
 
   else: # ------------------------------------------- Displaying Info (GET) --------------------------------------------
+    result = []
     try:
       cur.execute(f'SELECT spell_id FROM temp') # Gets spell id's from temp table so the if statement below can check the length of it
 
@@ -225,7 +225,9 @@ def multisearch():
         spell_id = cur.fetchone()[0] # Fetches the id from query above
 
         cur.execute(f"SELECT * FROM spells WHERE id = {spell_id}") # Gathers information on any spells that are stored in temp table
-        result = cur.fetchall()
+        spell__ = list(itertools.chain(*cur.fetchall()))
+        spell__.insert(1, "CLASS")
+        result.append(spell__)
       else: # If multiple results are found in the temp table
 
         cur.execute(f'SELECT spell_id FROM temp') # Gets spells id's from temp table
@@ -237,14 +239,21 @@ def multisearch():
 
         for num in spell_id: # Loops through the list that contains each spell id that needs to be queried
           cur.execute(f"SELECT * FROM spells WHERE id = {num}") # Gathers information on any spells thats ids were stored in temp table
-          result.append(cur.fetchone()) # Appends the result from the query as a list to the results list
+          spell = list(itertools.chain(*cur.fetchall()))
+          spell.insert(1, "CLASS")
+          result.append(spell) # Appends the result from the query as a list to the results list
 
       # Converts list to html than can be inserted in the table on the webpage
       final = "" 
       i = 0
+
+      #print(result)
       for row in result: # Loops through all the spells found in the temp table
+        
+        #print("done")
         final += "<tr>" # Adds a <tr> to mark the start of a row
         for column in row: # Loops through each aspect of the spell e.g. name, class, level
+
           if(classes[i] == "class"):
             # Get class of current spell
             column = ""
@@ -254,8 +263,8 @@ def multisearch():
             for id___ in ids___:
               cur.execute(f'SELECT class FROM classes WHERE id = {id___}')
 
-              column += f"{cur.fetchone()[0]} "
-
+              column += f"{cur.fetchone()[0]}, "
+                
           final = final + f" <td class='{classes[i]}'>{column}</td>" # Adds <td> tag to mark it as a column and adds a class, using i, so it can be collapsed with jquery
           i += 1 
         i = 0 # resets i
