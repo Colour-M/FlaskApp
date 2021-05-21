@@ -19,12 +19,27 @@
 
 
 {% block body %}
-<h2>Home</h2>
-<p>This is a flask based web app that uses the bootstrap framework to deal with visuals. The purpose of the app is to search through a data base using SQLite and display the data in a easy to read way.</p>
-<h5>How to use</h5>
-<div style="width: 50%;">
-  <p>Click on the multisearch tab in the nav bar above to access the search page. You can search a spell/s by id, clas, etc... A spreedsheet that can be accessed in the nav bar above that contains all the spells available. Multiple queries can be done at once by seperating the searches with a "|" e.g. Bard|Cleric. 
-    The search type dropdown can be used to do search for multiple types at once such as searching for a spell with the class Bard and duration of 1 minute using "Bard|1 minute" with class and duration selected in the search type dropdown.</p>
+<h1>Home</h1>
+<div style="width: 50%;"class="card card-body">
+  <p>This is a flask based web app that uses the bootstrap framework to deal with visuals. The purpose of the app is to search through a data base using SQLite and display the data in a easy to read way.</p>
+</div>
+
+<br>
+
+<div>
+  <button style="border: solid #d4d4d4;" class="btn btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+    <h5>How to use: ▼</h5>
+  </button>
+</div>
+
+
+<div class="collapse" id="collapseExample">
+  <div style="width: 50%;" class="card card-body">
+    <p style="font-style: italic; color: gray; font-size: small;">READ ALL THE WAY THROUGH</p>
+    <p>Click on the multisearch tab in the nav bar above to access the search page. You can search a spell/s by id, class, etc... A spreedsheet that can be accessed in the nav bar above that contains all the spells available. Multiple queries can be done at once by seperating the searches with a "|" e.g. Bard|Cleric. 
+      The search type dropdown can be used to do search for multiple types at once such as searching for a spell with the class Bard and duration of 1 minute using "Bard|1 minute" with class and duration selected in the search type 
+      dropdown. Once a search is complete all of the results will appear in a table below the search bar. Columns can be toggled on and off, so you can find just the information you want.</p>
+  </div>
 </div>
 
 <img src="static/Dungeons&DragonsDice.png" alt="Dungeons and dragons dice" style="width: 20%;">

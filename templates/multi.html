@@ -13,7 +13,7 @@ $(document).ready(function(){
 
   //Toggles the columns tab
   $(".checkToggle").click(function(){
-    $(".form-group").slideToggle(500);
+    $(".form-group").slideToggle(250);
   });
 
 
@@ -42,9 +42,10 @@ $(document).ready(function(){
 
 
 {% block body %}
-  <h2>Multi Search</h2>
+  <h1>Multi Search:</h1>
   <br>
 
+  <h4>Search:</h4>
   <form action="#" method='POST'>
 
       <div class="dropdown">
@@ -80,14 +81,14 @@ $(document).ready(function(){
   <br>
 
   <h4>Output:</h4>
-  <button class="checkToggle btn btn-outline-secondary" style="display: inline;">Columns</button>
+  <button class="checkToggle btn btn-outline-secondary" style="display: inline;">Columns ▼</button>
 
   <form action="/clear" style="display: inline;">
     <button class="btn btn-outline-secondary" type="submit">Clear Table</button>
   </form>
 
 
-    <div class="form-group" style="display: none;">
+    <div class="form-group card-body" style="display: none;">
       <input type="checkbox" class="toggle" data-columnid="id"> <label>Id</label> 
       <br>
       <input type="checkbox" class="toggle" data-columnid="class" checked="True"> <label>Class</label> 
@@ -108,10 +109,10 @@ $(document).ready(function(){
       <br>
       <input type="checkbox" class="toggle" data-columnid="description"> <label>Description</label> 
     </div>
-    <br>
-    <a>Results found: {{results_found}} spells</a>
-    <a>{{status}}</a>
-<br>
+    
+    <p>Results found: {{results_found}} spells</p>
+    <p>{{status}}</p>
+
     <table class="table table-striped">
       <thead>
         <tr>

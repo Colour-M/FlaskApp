@@ -182,13 +182,13 @@ def multisearch():
     if(types["class"] == "on"):
       try:
         
-        if(multi):
+        if(multi): # If the user has searching for multiple classes
           for id_ in find.search:
             find.search = id_
             isClass = find.get_ids_from_class()
             if(isClass):
               find.insert_multi_ids()
-        else:
+        else: # If just one class is searched
           
           find.get_ids_from_class()
           find.insert_multi_ids()
