@@ -87,17 +87,21 @@ class search_obj:
     con.commit()
 
   def get_ids_from_class(self):
-    
-    temp = []
-    self.search = f'"{self.search}"' 
-    cur.execute(f'SELECT id FROM classes WHERE class LIKE {self.search}')
-    
-    id___ = cur.fetchone()[0]
-    print("debug2")
-    cur.execute(f'SELECT spell_id FROM class_spell_link WHERE class_id = {id___}')
-    print("debug1")
-    results = list(itertools.chain(*cur.fetchall()))
-    self.search = results
+    try:
+      temp = []
+      self.search = f'"{self.search}"' 
+      cur.execute(f'SELECT id FROM classes WHERE class LIKE {self.search}')
+      
+      id___ = cur.fetchone()[0]
+      print("debug2")
+      cur.execute(f'SELECT spell_id FROM class_spell_link WHERE class_id = {id___}')
+      print("debug1")
+      results = list(itertools.chain(*cur.fetchall()))
+      self.search = results
+      return True
+    except:
+      print("Class search has failed (In function)")
+      return False
       
 @app.route('/')
 def index():
@@ -181,8 +185,9 @@ def multisearch():
         if(multi):
           for id_ in find.search:
             find.search = id_
-            find.get_ids_from_class()
-            find.insert_multi_ids()
+            isClass = find.get_ids_from_class()
+            if(isClass):
+              find.insert_multi_ids()
         else:
           
           find.get_ids_from_class()
@@ -195,7 +200,7 @@ def multisearch():
 
     find.search = request.form['search']
 
-    for l in find.search: # Resets the search back to include searches that are not just id's
+    for l in find.search: # Resets the search back to include searches that are not just id's (I know it should be a function but I could not implement it before finishing project)
       if l == "|":
         find.search = list(find.search.split("|"))
         multi = True
@@ -255,16 +260,19 @@ def multisearch():
         for column in row: # Loops through each aspect of the spell e.g. name, class, level
 
           if(classes[i] == "class"):
-            # Get class of current spell
-            column = ""
-            cur.execute(f'SELECT class_id FROM class_spell_link WHERE spell_id = {row[0]}')
-            ids___ = list(itertools.chain(*cur.fetchall()))
+            # ------------- Get classes of current spell --------------------
+            column = []
+            cur.execute(f'SELECT class_id FROM class_spell_link WHERE spell_id = {row[0]}') # Gets all the class_ids from the current spell
+            ids___ = list(itertools.chain(*cur.fetchall())) # Flattens list
             
             for id___ in ids___:
-              cur.execute(f'SELECT class FROM classes WHERE id = {id___}')
+              cur.execute(f'SELECT class FROM classes WHERE id = {id___}') # Gets class from classes table with the class_id found un class_spell_link table
 
-              column += f"{cur.fetchone()[0]}, "
+              column.append(cur.fetchone()[0]) # Appends class to the column
+
+            column = str(", ".join(column)) #------ Converts list to a comma-seperated string ------------
                 
+
           final = final + f" <td class='{classes[i]}'>{column}</td>" # Adds <td> tag to mark it as a column and adds a class, using i, so it can be collapsed with jquery
           i += 1 
         i = 0 # resets i
