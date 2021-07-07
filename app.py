@@ -52,7 +52,7 @@ class search_obj:
     for type_ in self.types_: # Loops through all the types that are used in the search and carries out a search using that type
       if(type_ != "id" and type_ != "class" and self.types_[type_] == "on"): # Makes sure it is not an id search
         for result in self.search: # Loops through each item in the current search and checks if it is in the spells table
-          result = f'"{result}"' # Adds quotes to the search so the sql will be (SELECT * FROM table WHERE type LIKE "search") with the quote otherwise it will not work
+          result = f'"{result}"' # Adds quotes to the search so the sql will be (SELECT * FROM table WHERE type LIKE "search") with the quotes around the search otherwise it will not work
           cur.execute(f'SELECT id FROM spells WHERE {type_} LIKE {result} AND level > {int(self.min_) - 1} AND level < {int(self.max_) + 1}')
           result = list(itertools.chain(*cur.fetchall())) # Gets the results and then flattens the list
           for id_ in result: # Loops through all the current ids and appends them to the temp table
